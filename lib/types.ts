@@ -89,6 +89,10 @@ export interface AnimeResponse {
       per_page: number;
     };
   };
+  data: Anime[];
+}
+
+export interface SingleAnimeResponse {
   data: Anime;
 }
 

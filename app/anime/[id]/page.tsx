@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-export default function AnimeDetailPage(){
+export default function AnimeDetailPage() {
     const params = useParams();
     const id = Number(params.id);
     const [anime, setAnime] = useState<Anime | null>(null);
@@ -22,6 +22,7 @@ export default function AnimeDetailPage(){
             setError(null);
             try {
                 const response = await getAnimeById(id);
+                console.log(response);
                 setAnime(response.data);
             } catch (err) {
                 console.error("Error fetching anime:", err);
