@@ -1,31 +1,9 @@
-import { useInfiniteScroll } from "@/hooks/infinite-scroll";
-import { Manga } from "@/lib/types";
-import AnimeGrid from "@/components/anime-grid";
+import React from 'react'
 
-const MangaPage = () => {
-  const params = {
-    order_by: "popularity",
-    sort: "asc",
-    sfw: "true",
-  };
-
-  const {
-    mediaList: mangaList,
-    loading,
-    hasMore,
-    lastMediaRef,
-  } = useInfiniteScroll<Manga>("manga", "", params);
-
+const Page = () => {
   return (
-    <div>
-      <AnimeGrid
-        animeList={mangaList}
-        loading={loading}
-        hasMore={hasMore}
-        lastAnimeElementRef={lastMediaRef}
-      />
-    </div>
-  );
-};
+    <div>Page</div>
+  )
+}
 
-export default MangaPage;
+export default Page

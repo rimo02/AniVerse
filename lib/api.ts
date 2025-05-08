@@ -1,4 +1,4 @@
-import {AnimeResponse} from "./types";
+import { Anime, AnimeResponse } from "./types";
 const BASE_API_URL = "https://api.jikan.moe/v4";
 const INITIAL_DELAY = 1000;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -48,9 +48,11 @@ export const fetchAnime = async (
   }
 };
 
-export const getTopAnime = async (page = 1, limit = 24) => {
-  return fetchAnime(`/top/anime`, { page, limit });
+export const getRandomAnime = async (): Promise<Anime> => {
+  const response = await fetchAnime(`/random/anime`);
+  return response.data;
 };
+
 
 export const getAnimeById = async (id: number) => {
   return fetchAnime(`/anime/${id}`);
