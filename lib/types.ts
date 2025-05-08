@@ -89,7 +89,7 @@ export interface AnimeResponse {
       per_page: number;
     };
   };
-  data: Anime[];
+  data: Anime;
 }
 
 export interface SearchParams {
