@@ -2,17 +2,16 @@
 import AnimeGrid from '@/components/anime-grid';
 import { useInfiniteScroll } from '@/hooks/infinite-scroll';
 import { useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { Suspense } from 'react';
 
-const Page = () => {
+const SearchContent = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const params = {
-    q:query,
-    order_by: 'popularity',
-    sort: 'asc',
+    q: query,
   }
   const search = useInfiniteScroll(`/anime`, params)
+
   return (
     <div className='w-full'>
       <h1 className="text-3xl font-bold mb-2">
@@ -25,7 +24,15 @@ const Page = () => {
         lastAnimeElementRef={search.lastAnimeRef}
       />
     </div>
-  )
+  );
 }
 
-export default Page
+const Page = () => {
+  return (
+    <Suspense fallback={<div></div>}>
+      <SearchContent />
+    </Suspense>
+  );
+};
+
+export default Page;
