@@ -20,6 +20,7 @@ export default function AnimeDetailPage() {
     const [comments, setComments] = useState<Comment[]>([]);
     const [comment, setComment] = useState('');
     const { data: session } = useSession();
+    const [isFavorite, setIsFavorite] = useState(false);
 
     const fetchComments = async () => {
         if (!id) return;
@@ -67,6 +68,7 @@ export default function AnimeDetailPage() {
                     user: {
                         id: session?.user?.id,
                         name: session?.user?.name,
+                        image: session?.user?.image,
                     }
                 })
             });
@@ -78,6 +80,21 @@ export default function AnimeDetailPage() {
             }
         } catch (error) {
             console.error("Error posting comment:", error);
+        }
+    }
+
+    const handleAddToFavorites = async () => {
+        if (!session?.user) return;
+        const res = await fetch('/api/favourites', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ animeId: id, email: session?.user.email }),
+        })
+        if (res.ok) {
+            const data = await res.json();
+            setIsFavorite(data.success);
+        } else {
+            console.error("Failed to toggle favorite");
         }
     }
 
@@ -119,27 +136,40 @@ export default function AnimeDetailPage() {
         <div className='max-w-5xl mx-auto mt-10 p-4 sm:p-6'>
             <div className='flex flex-col sm:flex-row items-start gap-8'>
                 {/* Image Section */}
-                <div className='relative w-full sm:w-1/3 h-[400px] rounded-md overflow-hidden shadow-md'>
-                    <Image
-                        src={anime.images.jpg.large_image_url}
-                        alt={anime.title}
-                        fill
-                        className='object-cover'
-                    />
-                    <div className='absolute top-2 left-2'>
-                        <Badge variant={'secondary'} className='font-medium'>
-                            {anime.type}
-                        </Badge>
+                <div className='w-full relative sm:w-1/3'>
+                    <div className='relative w-full h-[400px] rounded-md overflow-hidden shadow-md'>
+                        <Image
+                            src={anime.images.jpg.large_image_url}
+                            alt={anime.title}
+                            fill
+                            className='object-cover'
+                        />
+
+                        <div className='absolute top-2 left-2'>
+                            <Badge variant={'secondary'} className='font-medium'>
+                                {anime.type}
+                            </Badge>
+                        </div>
+                        <div className='absolute top-2 right-2'>
+                            <Badge
+                                variant={'secondary'}
+                                className='bg-background/80 backdrop-blur-sm font-bold text-yellow-800 dark:text-yellow-300 border-yellow-500/30'
+                            >
+                                ★ {anime.score}
+                            </Badge>
+                        </div>
                     </div>
-                    <div className='absolute top-2 right-2'>
-                        <Badge
-                            variant={'secondary'}
-                            className='bg-background/80 backdrop-blur-sm font-bold text-yellow-800 dark:text-yellow-300 border-yellow-500/30'
+                    {session?.user && (
+                        <button
+                            onClick={handleAddToFavorites}
+                            className={`p-2 rounded-md w-full mt-2 transition-colors ${isFavorite ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                }`}
                         >
-                            ★ {anime.score}
-                        </Badge>
-                    </div>
+                            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                        </button>
+                    )}
                 </div>
+
 
                 {/* Details Section */}
                 <div className='flex flex-col justify-between w-full sm:w-2/3 gap-6'>
@@ -253,7 +283,7 @@ export default function AnimeDetailPage() {
                 <h2 className='text-xl font-semibold'>Trailer</h2>
                 <div className='aspect-video w-full'>
                     <iframe
-                        src={`https://www.youtube.com/embed/${anime.trailer?.youtube_id}`} // Corrected URL format
+                        src={`https://www.youtube.com/embed/${anime.trailer?.youtube_id}`}
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
@@ -287,10 +317,17 @@ export default function AnimeDetailPage() {
                         comments.map((c) => (
                             <div key={c._id} className="flex flex-col p-3 rounded-md">
                                 <div className="flex gap-4 text-sm text-gray-400 mb-1">
+                                    <span className='w-8 h-8 rounded-full relative'>
+                                        <Image
+                                            src={c.image}   
+                                            alt='img'
+                                            fill
+                                        />
+                                    </span>
                                     <span className="font-semibold dark:text-yellow-600 text-black">{c.userName}</span>
                                     <span>{formatDate(new Date(c.createdAt))}</span>
                                 </div>
-                                <p className="dark:text-gray-200 text-black text-sm pl-1">{c.text}</p>
+                                <p className="dark:text-gray-200 text-black text-sm pl-12">{c.text}</p>
                             </div>
                         ))) : (
                         <div>No Comments posted</div>

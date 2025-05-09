@@ -114,6 +114,7 @@ export interface Comment {
   userName: string;
   text: string;
   createdAt: Date;
+  image: string;
 }
 export interface IUser extends Document {
   googleId: string;
@@ -142,6 +143,7 @@ export interface Icomment extends Document {
   userName: string;
   text: string;
   createdAt: Date;
+  image: string;
 }
 
 const CommentSchema = new Schema<Icomment>({
@@ -150,6 +152,7 @@ const CommentSchema = new Schema<Icomment>({
   userName: String,
   text: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  image: { type: String },
 });
 
 export const Comment =
