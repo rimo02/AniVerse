@@ -107,13 +107,21 @@ export interface SearchParams {
   order_by?: string;
   sfw?: boolean;
 }
-
+export interface Comment {
+  _id: string;
+  animeId: number;
+  userId: string;
+  userName: string;
+  text: string;
+  createdAt: Date;
+}
 export interface IUser extends Document {
   googleId: string;
   name: string;
   email: string;
   image: string;
   createdAt: Date;
+  favourites: number[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -122,7 +130,27 @@ const UserSchema = new Schema<IUser>({
   email: String,
   image: String,
   createdAt: { type: Date, default: Date.now },
+  favourites: [{ type: Number, default: [] }],
 });
 
 export const User =
   mongoose.models.User || mongoose.model<IUser>("AniVerse user", UserSchema);
+
+export interface Icomment extends Document {
+  animeId: number;
+  userId: string;
+  userName: string;
+  text: string;
+  createdAt: Date;
+}
+
+const CommentSchema = new Schema<Icomment>({
+  animeId: { type: Number, required: true },
+  userId: { type: String, required: true },
+  userName: String,
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+export const Comment =
+  mongoose.models.Comment || mongoose.model<Icomment>("Comment", CommentSchema);

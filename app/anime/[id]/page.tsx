@@ -2,8 +2,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { getAnimeById } from '@/lib/api';
-import { Anime } from '@/lib/types';
+import { Anime, Comment } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -14,25 +17,70 @@ export default function AnimeDetailPage() {
     const [anime, setAnime] = useState<Anime | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [comment, setComment] = useState('');
+    const { data: session } = useSession();
+
+    const fetchComments = async () => {
+        if (!id) return;
+        const response = await fetch(`/api/comments/${id}`);
+        const data = await response.json();
+        if (data?.comments) {
+            setComments(data.comments);
+        } else {
+            console.error("Error fetching comments:", data);
+        }
+    }
+
+    const fetchAnime = async () => {
+        if (!id) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await getAnimeById(id);
+            console.log(response);
+            setAnime(response.data);
+        } catch (err) {
+            console.error("Error fetching anime:", err);
+            setError("Failed to load anime details.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchAnime = async () => {
-            if (!id) return;
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await getAnimeById(id);
-                console.log(response);
-                setAnime(response.data);
-            } catch (err) {
-                console.error("Error fetching anime:", err);
-                setError("Failed to load anime details.");
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchAnime();
+        fetchComments();
     }, [id]);
+
+    const handleCommentSubmit = async () => {
+        if (!comment.trim()) return;
+        try {
+            const response = await fetch('/api/comments', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    animeId: id,
+                    text: comment,
+                    user: {
+                        id: session?.user?.id,
+                        name: session?.user?.name,
+                    }
+                })
+            });
+            if (response.ok) {
+                setComment('');
+                fetchComments();
+            } else {
+                console.error("Failed to post comment:", await response.json());
+            }
+        } catch (error) {
+            console.error("Error posting comment:", error);
+        }
+    }
+
 
     if (loading) {
         return (
@@ -55,7 +103,6 @@ export default function AnimeDetailPage() {
                         <Skeleton className='h-4 w-1/3' />
                     </div>
                 </div>
-
             </div>
         )
     }
@@ -206,13 +253,51 @@ export default function AnimeDetailPage() {
                 <h2 className='text-xl font-semibold'>Trailer</h2>
                 <div className='aspect-video w-full'>
                     <iframe
-                        src={`https://www.youtube.com/embed/${anime.trailer?.youtube_id}`}
+                        src={`https://www.youtube.com/embed/${anime.trailer?.youtube_id}`} // Corrected URL format
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         className='w-full h-full'
                     ></iframe>
                 </div>
+            </div>
+            <div className="flex flex-col gap-6 mt-6 w-full border p-10">
+
+                {session ? (
+                    <div className="flex flex-col sm:flex-row gap-2 mb-6 w-full items-center">
+                        <Textarea
+                            value={comment}
+                            placeholder="Write a comment..."
+                            onChange={(e) => setComment(e.target.value)}
+                            className="w-full p-3 rounded-md border"
+                        />
+                        <button
+                            onClick={handleCommentSubmit}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                        >
+                            Post
+                        </button>
+                    </div>
+                ) : (
+                    <div className="mb-6 text-gray-400 italic">Sign in to post a comment</div>
+                )}
+                <h1 className='text-3xl bold'>Comments</h1>
+                <div className="flex flex-col">
+                    {comments.length > 0 ? (
+                        comments.map((c) => (
+                            <div key={c._id} className="flex flex-col p-3 rounded-md">
+                                <div className="flex gap-4 text-sm text-gray-400 mb-1">
+                                    <span className="font-semibold dark:text-yellow-600 text-black">{c.userName}</span>
+                                    <span>{formatDate(new Date(c.createdAt))}</span>
+                                </div>
+                                <p className="dark:text-gray-200 text-black text-sm pl-1">{c.text}</p>
+                            </div>
+                        ))) : (
+                        <div>No Comments posted</div>
+                    )
+                    }
+                </div>
+
             </div>
         </div>
     )
