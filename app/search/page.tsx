@@ -1,16 +1,19 @@
-"use client"
+'use client';
 import AnimeGrid from '@/components/anime-grid';
 import { useInfiniteScroll } from '@/hooks/infinite-scroll';
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation';
 import React, { Suspense } from 'react';
 
 const SearchContent = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const params = {
-    q: query,
-  }
-  const search = useInfiniteScroll(`/anime`, params)
+
+  const {
+    animeList,
+    loading,
+    hasMore,
+    lastAnimeRef,
+  } = useInfiniteScroll(`/anime`, { q: query });
 
   return (
     <div className='w-full'>
@@ -18,18 +21,18 @@ const SearchContent = () => {
         Search Results for: <span className="text-primary">{query}</span>
       </h1>
       <AnimeGrid
-        animeList={search.animeList}
-        loading={search.loading}
-        hasMore={search.hasMore}
-        lastAnimeElementRef={search.lastAnimeRef}
+        animeList={animeList}
+        loading={loading}
+        hasMore={hasMore}
+        lastAnimeElementRef={lastAnimeRef}
       />
     </div>
   );
-}
+};
 
 const Page = () => {
   return (
-    <Suspense fallback={<div></div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <SearchContent />
     </Suspense>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { Anime, AnimeResponse } from "@/lib/types";
 import { fetchAnime } from "@/lib/api";
 import { SearchParams } from "next/dist/server/request/search-params";
@@ -62,18 +62,17 @@ export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
     [loading, hasMore, loadAnimes, page]
   );
 
-  const reset = useCallback(() => {
+  useEffect(() => {
     setAnimeList([]);
     setPage(1);
     setHasMore(true);
-    loadAnimes(1);
-  }, [loadAnimes]);
+    setLoading(false);
+  }, [params.q]);
 
   return {
     animeList,
     loading,
     hasMore,
     lastAnimeRef,
-    reset,
   };
 }

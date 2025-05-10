@@ -24,6 +24,7 @@ export default function AnimeDetailPage() {
 
     const fetchComments = async () => {
         if (!id) return;
+        setLoading(true);
         const response = await fetch(`/api/comments/${id}`);
         const data = await response.json();
         if (data?.comments) {
@@ -35,7 +36,7 @@ export default function AnimeDetailPage() {
 
     const fetchAnime = async () => {
         if (!id) return;
-        setLoading(true);
+        // setLoading(true);
         setError(null);
         try {
             const response = await getAnimeById(id);
@@ -315,11 +316,11 @@ export default function AnimeDetailPage() {
                 <div className="flex flex-col">
                     {comments.length > 0 ? (
                         comments.map((c) => (
-                            <div key={c._id} className="flex flex-col p-3 rounded-md">
+                            <div key={c._id} className="flex flex-col md:p-3 p-0 rounded-md">
                                 <div className="flex gap-4 text-sm text-gray-400 mb-1">
                                     <span className='w-8 h-8 rounded-full relative'>
                                         <Image
-                                            src={c.image}   
+                                            src={c.image}
                                             alt='img'
                                             fill
                                         />
@@ -327,7 +328,7 @@ export default function AnimeDetailPage() {
                                     <span className="font-semibold dark:text-yellow-600 text-black">{c.userName}</span>
                                     <span>{formatDate(new Date(c.createdAt))}</span>
                                 </div>
-                                <p className="dark:text-gray-200 text-black text-sm pl-12">{c.text}</p>
+                                <p className="dark:text-gray-200 text-black text-sm md:pl-12">{c.text}</p>
                             </div>
                         ))) : (
                         <div>No Comments posted</div>

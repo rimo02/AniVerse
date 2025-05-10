@@ -37,13 +37,11 @@ const Page = () => {
 
   return (
     <div className="mt-10">
-      <div className="grid grid-cols-6 md:grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
         {favAnime.map((anime) => (
-          <>
-            <div className="w-full max-w-xs mx-auto">
-              <AnimeCard key={anime.mal_id} anime={anime} />
-            </div>
-          </>
+          <div key={anime.mal_id} className="w-full mx-auto">
+            <AnimeCard anime={anime} />
+          </div>
         ))}
       </div>
     </div>
