@@ -48,3 +48,13 @@ export const getRandomAnime = async (): Promise<Anime> => {
   const response = await fetchAnime<SingleAnimeResponse>(`/random/anime`);
   return response.data;
 };
+
+export const getComments = async (animeId: number) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/comments/${animeId}`);
+  const data = await response.json();
+  if (data?.comments) {
+    return data?.comments;
+  } else {
+    console.error("Error fetching comments:", data);
+  }
+};

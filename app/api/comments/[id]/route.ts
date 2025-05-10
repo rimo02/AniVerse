@@ -1,9 +1,9 @@
 import { connectDB } from "@/lib/db";
 import { Comment } from "@/lib/types";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const id = Number((await params).id);

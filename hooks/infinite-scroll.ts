@@ -4,12 +4,17 @@ import { Anime, AnimeResponse } from "@/lib/types";
 import { fetchAnime } from "@/lib/api";
 import { SearchParams } from "next/dist/server/request/search-params";
 
-export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
-  const [animeList, setAnimeList] = useState<Anime[]>([]);
-  const [page, setPage] = useState(1);
+export function useInfiniteScroll(
+  endpoint: string,
+  params: SearchParams = {},
+  initialAnime: Anime[] = []
+) {
+  const [animeList, setAnimeList] = useState<Anime[]>(initialAnime);
+  const [page, setPage] = useState(initialAnime.length > 0 ? 2 : 1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const initialLoad = useRef(true);
 
   const loadAnimes = useCallback(
     async (pageToLoad: number) => {
@@ -19,7 +24,7 @@ export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
       try {
         const response = (await fetchAnime(endpoint, {
           ...params,
-          page,
+          page: pageToLoad,
           limit: 24,
         })) as AnimeResponse;
 
@@ -28,12 +33,9 @@ export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
           return;
         }
 
-        if (pageToLoad === 1) {
-          setAnimeList(response.data);
-        } else {
-          setAnimeList((prevAnimes) => [...prevAnimes, ...response.data]);
-        }
-
+        setAnimeList((prevAnimes) =>
+          pageToLoad === 1 ? response.data : [...prevAnimes, ...response.data]
+        );
         setHasMore(response.pagination.has_next_page);
         setPage(pageToLoad + 1);
       } catch (error) {
@@ -43,7 +45,7 @@ export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
         setLoading(false);
       }
     },
-    [endpoint, loading, hasMore, page, params]
+    [endpoint, loading, hasMore, params]
   );
 
   const lastAnimeRef = useCallback(
@@ -63,10 +65,13 @@ export function useInfiniteScroll(endpoint: string, params: SearchParams = {}) {
   );
 
   useEffect(() => {
-    setAnimeList([]);
-    setPage(1);
-    setHasMore(true);
-    setLoading(false);
+    if (!initialLoad.current) {
+      setAnimeList([]);
+      setPage(1);
+      setHasMore(true);
+      setLoading(false);
+    }
+    initialLoad.current = false;
   }, [params.q]);
 
   return {
