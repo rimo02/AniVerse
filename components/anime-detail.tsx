@@ -11,37 +11,36 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import React, { Suspense, useEffect, useState } from 'react';
 
-
 export default function AnimeDetailPage({ anime }: { anime: Anime }) {
     const id = anime.mal_id;
     const [comments, setComments] = useState<Comment[]>([]);
     const { data: session } = useSession();
     const [favourite, setFavourite] = useState(false);
 
-    const fetchComments = async () => {
-        const response = await fetch(`/api/comments/${id}`);
-        const data = await response.json();
-        if (data?.comments) {
-            setComments(data.comments);
-        } else {
-            console.error("Error fetching comments:", data);
-        }
-    }
 
     useEffect(() => {
+        const fetchComments = async () => {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/comments/${id}`);
+            const data = await response.json();
+            if (data?.comments) {
+                setComments(data.comments);
+            } else {
+                console.error("Error fetching comments:", data);
+            }
+        }
         fetchComments();
     }, [id]);
 
     const handleToggleFavorites = async () => {
         if (!session?.user) return;
         try {
-            const res = await fetch(`/api/favourites`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/favourites`);
             if (!res.ok) throw new Error("Failed to fetch favorites.");
 
             const data = await res.json();
             const isAlreadyFavorite = data.favourites.includes(id);
             if (isAlreadyFavorite) {
-                const removeRes = await fetch('/api/favourites', {
+                const removeRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/favourites`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ animeId: id, email: session.user.email }),
@@ -50,7 +49,7 @@ export default function AnimeDetailPage({ anime }: { anime: Anime }) {
                 setFavourite(false);
             }
             else {
-                const addRes = await fetch('/api/favourites', {
+                const addRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/favourites`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ animeId: id, email: session.user.email }),
