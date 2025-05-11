@@ -1,24 +1,14 @@
-import AnimeDetailPage from "@/components/anime-detail";
-import CommentsSection from "@/components/comment-section";
-import { Suspense } from "react";
+import AnimeDetailPage from '@/components/anime-detail';
+import { getAnimeById } from '@/lib/api';
 
-export const experimental_ppr = true
+export const revalidate = 3600;
 
-interface Props {
-    params: { id: string };
-}
-
-export default async function Page({ params }: Props) {
+export default async function AnimePage({ params }: { params: { id: string } }) {
     const id = Number((await params).id);
+    const response = await getAnimeById(id);
 
+    const anime = response.data;
     return (
-        <>
-            <div className='max-w-5xl mx-auto mt-10 p-4 sm:p-6'>
-                <AnimeDetailPage id={id} />
-            </div>
-            <Suspense fallback={<div>Loading Comments</div>}>
-                <CommentsSection animeId={id} />
-            </Suspense>
-        </>
-    )
+        <AnimeDetailPage anime={anime} />
+    );
 }

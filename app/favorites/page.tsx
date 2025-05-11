@@ -1,47 +1,47 @@
-"use client";
-import React, { useEffect, useState } from "react";
 import { getAnimeById } from "@/lib/api";
-import AnimeCard from "@/components/anime-card";
 import { Anime } from "@/lib/types";
+import { auth } from "@/auth";
+import { connectDB } from "@/lib/db";
+import { User } from "@/lib/types";
+import { NextResponse } from "next/server";
+import AnimeCard from "@/components/anime-card";
 
-const Page = () => {
-  const [favAnime, setFavAnime] = useState<Anime[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 360;
 
-  useEffect(() => {
-    const fetchFavourites = async () => {
-      try {
-        const res = await fetch("/api/favourites");
-        if (!res.ok) throw new Error("Failed to fetch favourites");
-        const data = await res.json();
-        console.log('data = ', data);
-        const animeData = await Promise.all(
-          data.favourites.map(async (id: number) => {
-            return (await getAnimeById(id)).data;
-          })
-        );
-        setFavAnime(animeData);
+const fetchFav = async () => {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  await connectDB();
+  const user = await User.findOne({ email: session.user.email });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
 
-        console.log('anime data =', favAnime);
+  return NextResponse.json({ favourites: user.favourites });
+}
 
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+const Page = async () => {
+  let favoriteAnime: Anime[] = [];
+  const res = await fetchFav();
 
-    fetchFavourites();
-  }, []);
+  if (!res.ok) throw new Error("Failed to fetch favourites");
+  const data = await res.json();
 
-  if (loading) return <div className="text-white text-2xl">Loading...</div>;
+  const animeData = await Promise.all(
+    data.favourites.map(async (id: number) => {
+      const response = await getAnimeById(id);
+      return response.data;
+    })
+  );
+  favoriteAnime = animeData;
 
   return (
     <div className="mt-10">
-      <div className="grid grid-cols-2 md:grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
-        {favAnime.map((anime) => (
-          <div key={anime.mal_id} className="w-full mx-auto">
-            <AnimeCard anime={anime} />
-          </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+        {favoriteAnime.map((item, index) => (
+          <AnimeCard key={index} anime={item} />
         ))}
       </div>
     </div>

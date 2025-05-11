@@ -23,7 +23,7 @@ const Navbar = () => {
     { name: 'Discover', path: '/' },
     { name: 'Random', path: '/random' },
     { name: 'Favorites', path: '/favorites' },
-    { name: 'Mangas', path: '/mangas' },
+    // { name: 'Mangas', path: '/mangas' },
   ]
 
   useEffect(() => {
@@ -136,9 +136,9 @@ const Navbar = () => {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align='start'>
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                {/* <DropdownMenuItem onClick={() => router.push('/profile')}>
                   Profile
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => signOut()}>
                   Sign Out
                 </DropdownMenuItem>

@@ -9,9 +9,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental:{
-    ppr:'incremental',
-  }
+  // experimental:{
+  //   ppr:'incremental',
+  // }
 };
 
 export default nextConfig;

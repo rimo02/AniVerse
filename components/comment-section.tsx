@@ -1,20 +1,16 @@
-import { getComments } from "@/lib/api";
-import CommentForm from "./comment-form";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 import { Comment } from "@/lib/types";
 
 interface Props {
-    animeId: number;
+    comments: Comment[];
 }
 
-export default async function CommentsSection({ animeId }: Props) {
-    const comments:Comment[] = await getComments(animeId);
+
+export default function CommentsSection({ comments }: Props) {
 
     return (
         <div className="flex flex-col gap-6 mt-6 w-full border p-10">
-            <CommentForm animeId={animeId} />
-            <h1 className="text-3xl font-bold">Comments</h1>
             <div className="flex flex-col gap-3">
                 {comments.length > 0 ? (
                     comments.map((c) => (

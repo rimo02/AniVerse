@@ -135,7 +135,8 @@ const UserSchema = new Schema<IUser>({
 });
 
 export const User =
-  mongoose.models.User || mongoose.model<IUser>("AniVerse user", UserSchema);
+  mongoose.models["AniVerse user"] ||
+  mongoose.model<IUser>("AniVerse user", UserSchema);
 
 export interface Icomment extends Document {
   animeId: number;

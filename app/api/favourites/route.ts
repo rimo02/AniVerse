@@ -16,12 +16,25 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
+export async function DELETE(req: NextRequest) {
+  const body = await req.json();
+  await connectDB();
+  const { animeId, email } = body;
+  const user = await User.findOne({ email });
+  const inFav = user.favourites.includes(animeId);
+  if (inFav) {
+    user.favourites.pull(animeId);
+    await user.save();
+    return NextResponse.json({ success: true });
+  }
+  return NextResponse.json({ success: false });
+}
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   await connectDB();
   const user = await User.findOne({ email: session.user.email });
 

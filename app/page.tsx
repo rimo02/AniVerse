@@ -12,7 +12,6 @@ const Home = async () => {
   };
 
   const initialAnime: AnimeResponse = await fetchAnime('/anime', params);
-
   return (
     <div className="w-full">
       <h1 className="text-4xl font-bold mb-2">Discover Anime</h1>
