@@ -3,16 +3,7 @@ import { getAnimeById } from '@/lib/api';
 
 export const revalidate = 3600;
 
-interface Params {
-    id: string;
-}
-
-interface PageProps {
-    params: Params;
-    searchParams?: Record<string, string | string[]>;
-}
-
-const AnimePage = async ({ params }: PageProps) => {
+const AnimePage = async ({ params }: { params: { id: string } }) => {
     const id = Number((await params).id);
     const response = await getAnimeById(id);
     const anime = response.data;
